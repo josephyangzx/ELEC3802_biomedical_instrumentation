@@ -1,0 +1,560 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>ECG_Lab</title><meta name="generator" content="MATLAB 9.7"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2020-05-01"><meta name="DC.source" content="ECG_Lab.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Lab 3: ECG</a></li><li><a href="#2">Load data</a></li><li><a href="#3">A. Examine the frequency spectrum and design filters for ECG</a></li><li><a href="#4">Q5 Low order filter</a></li><li><a href="#5">Check the baseline drift</a></li><li><a href="#6">Q6 9th order filter</a></li><li><a href="#7">Q7 Notch filter</a></li><li><a href="#8">Examine filtered signal</a></li><li><a href="#9">B Identify ECG Components</a></li><li><a href="#10">Threshold</a></li><li><a href="#11">BPM</a></li><li><a href="#12">Each segment BPM</a></li></ul></div><h2 id="1">Lab 3: ECG</h2><p>ELEC3802</p><pre class="codeinput">clc
+clear
+clf
+</pre><img vspace="5" hspace="5" src="ECG_Lab_01.png" alt=""> <h2 id="2">Load data</h2><pre class="codeinput">load(<span class="string">'ECG_noisy.mat'</span>);
+</pre><h2 id="3">A. Examine the frequency spectrum and design filters for ECG</h2><pre class="codeinput"><span class="comment">%Examine the DC off-set</span>
+figure(1)
+
+<span class="comment">% Pick ECG1_noisy</span>
+periodogram(ECG1_noisy);
+<span class="comment">% Q3 There is DC offset as the value is not ZERO at frequency of 0Hz</span>
+title(<span class="string">'Noisy ECG1'</span>);
+saveas(gcf,<span class="string">'ECG1_noisy'</span>,<span class="string">'png'</span>);
+
+<span class="comment">% Raw signal</span>
+N=length(ECG1_noisy);
+t=[0:N-1]/Fs;
+figure();
+plot(t(1:500),ECG1_noisy(1:500));
+title(<span class="string">'ECG1 Raw Signal'</span>);
+xlabel(<span class="string">'Time (s)'</span>);
+ylabel(<span class="string">'Intensity'</span>);
+saveas(gcf,<span class="string">'ECG1_noisy_Raw'</span>,<span class="string">'png'</span>);
+
+
+NF=2^16;
+[Pxx,W]=periodogram(ECG1_noisy,[],NF);
+<span class="comment">%converting to Hz</span>
+fp=Fs*W/(2*pi);
+<span class="comment">% CHECK FOR DC OFFSET AND POWER LINE PICK UP</span>
+figure();
+plot(fp,Pxx,<span class="string">'-'</span>);
+title(<span class="string">'Periodogram PSD of ECG1'</span>);
+xlabel(<span class="string">'Frequency (Hz)'</span>);
+ylabel(<span class="string">'Intensity'</span>);
+saveas(gcf,<span class="string">'ECG1_noisy_periodogram'</span>,<span class="string">'png'</span>);
+
+<span class="comment">% Q4. Yes, there are spikes in the signal at normalised freq = 0.4 (50Hz)</span>
+</pre><img vspace="5" hspace="5" src="ECG_Lab_02.png" alt=""> <img vspace="5" hspace="5" src="ECG_Lab_03.png" alt=""> <img vspace="5" hspace="5" src="ECG_Lab_04.png" alt=""> <h2 id="4">Q5 Low order filter</h2><pre class="codeinput">fc = 0.2;
+Wn = fc/(Fs/2);
+<span class="comment">% 1st order</span>
+[b,a] = butter(1,Wn,<span class="string">'high'</span>);
+
+<span class="comment">% Check the frequency response of the filter.</span>
+figure();
+freqz(b,a);
+title(<span class="string">'Frequency Response'</span>);
+saveas(gcf,<span class="string">'frequencyResponse_1'</span>,<span class="string">'png'</span>);
+
+<span class="comment">% Visualize filter</span>
+ECG1_low_filtered = filter(b,a,ECG1_noisy);
+figure();
+<span class="comment">% periodogram(ECG1_low_filtered);</span>
+[Pxx,W]=periodogram(ECG1_low_filtered,[],NF);
+fp=Fs*W/(2*pi);
+figure();
+plot(fp,Pxx,<span class="string">'-'</span>);
+title(<span class="string">'Periodogram PSD of ECG1 after High Pass Filter'</span>);
+xlabel(<span class="string">'Frequency (Hz)'</span>);
+ylabel(<span class="string">'Intensity'</span>);
+saveas(gcf,<span class="string">'Periodogram_PSD_ECG1_High_Pass_Filter'</span>,<span class="string">'png'</span>);
+figure();
+freqz(ECG1_low_filtered);
+title(<span class="string">'Frequency Response'</span>);
+saveas(gcf,<span class="string">'High_Pass_Filtered_frequencyResponse_1'</span>,<span class="string">'png'</span>);
+</pre><img vspace="5" hspace="5" src="ECG_Lab_05.png" alt=""> <img vspace="5" hspace="5" src="ECG_Lab_06.png" alt=""> <img vspace="5" hspace="5" src="ECG_Lab_07.png" alt=""> <img vspace="5" hspace="5" src="ECG_Lab_08.png" alt=""> <h2 id="5">Check the baseline drift</h2><pre class="codeinput">figure();
+plot(t(1:4000),ECG1_noisy(1:4000));
+hold <span class="string">on</span>
+plot(t(1:4000),ECG1_low_filtered(1:4000));
+title(<span class="string">'ECG1 Raw Signal VS High-Pass Filtered Signal'</span>);
+xlabel(<span class="string">'Time (s)'</span>);
+ylabel(<span class="string">'Intensity'</span>);
+legend(<span class="string">'ECG1 Raw Signal'</span>,<span class="string">'ECG1 High-Pass Filtered'</span>);
+set(legend,<span class="string">'Location'</span>,<span class="string">'best'</span>);
+saveas(gcf,<span class="string">'ECG1_baselineDrift'</span>,<span class="string">'png'</span>);
+
+<span class="comment">% The baseline drift and DC offset is partially removed.</span>
+</pre><img vspace="5" hspace="5" src="ECG_Lab_09.png" alt=""> <h2 id="6">Q6 9th order filter</h2><pre class="codeinput">fc_9 = 35;
+Wn_9 = fc_9/(Fs/2);
+[b_9,a_9] = butter(9,Wn_9,<span class="string">'low'</span>);
+ECG1_high_filtered = filter(b_9,a_9,ECG1_low_filtered);
+
+[Pxx,W]=periodogram(ECG1_high_filtered,[],NF);
+fp=Fs*W/(2*pi);
+figure();
+plot(fp,Pxx,<span class="string">'-'</span>);
+title(<span class="string">'Periodogram PSD of ECG1 after Low Pass Filter'</span>);
+xlabel(<span class="string">'Frequency (Hz)'</span>);
+ylabel(<span class="string">'Intensity'</span>);
+saveas(gcf,<span class="string">'Periodogram_PSD_ECG1_Low_Pass_Filter'</span>,<span class="string">'png'</span>);
+figure();
+freqz(ECG1_high_filtered);
+title(<span class="string">'Frequency Response'</span>);
+saveas(gcf,<span class="string">'Low_Pass_Filtered_frequencyResponse_1'</span>,<span class="string">'png'</span>);
+</pre><img vspace="5" hspace="5" src="ECG_Lab_10.png" alt=""> <img vspace="5" hspace="5" src="ECG_Lab_11.png" alt=""> <h2 id="7">Q7 Notch filter</h2><pre class="codeinput">noise_freq = 50;
+Wo = noise_freq/(Fs/2);
+Bw = Wo/35;
+[b_n,a_n] = iirnotch(Wo,Bw);
+<span class="comment">% fvtool(b,a);</span>
+
+<span class="comment">% Apply the filter to the signal</span>
+ECG1_Power_line_filtered = filter(b_n,a_n,ECG1_high_filtered);
+[Pxx,W]=periodogram(ECG1_Power_line_filtered,[],NF);
+fp=W*(Fs/2)/(pi);
+figure();
+plot(fp,Pxx,<span class="string">'-'</span>);
+title(<span class="string">'Periodogram PSD of ECG1 after Notch Filter'</span>);
+xlabel(<span class="string">'Frequency (Hz)'</span>);
+ylabel(<span class="string">'Intensity'</span>);
+saveas(gcf,<span class="string">'ECG1_Power_line_filtered_PSD'</span>,<span class="string">'png'</span>);
+
+figure();
+freqz(ECG1_Power_line_filtered);
+title(<span class="string">'Frequency Response'</span>);
+saveas(gcf,<span class="string">'Nortch_Filtered_frequencyResponse_1'</span>,<span class="string">'png'</span>);
+</pre><img vspace="5" hspace="5" src="ECG_Lab_12.png" alt=""> <img vspace="5" hspace="5" src="ECG_Lab_13.png" alt=""> <h2 id="8">Examine filtered signal</h2><pre class="codeinput">figure();
+plot(t(1:500),ECG1_Power_line_filtered(1:500));
+title(<span class="string">'ECG1 Filtered Signal'</span>);
+xlabel(<span class="string">'Time (s)'</span>);
+ylabel(<span class="string">'Intensity'</span>);
+saveas(gcf,<span class="string">'ECG1_Filtered_Exmained'</span>,<span class="string">'png'</span>);
+</pre><img vspace="5" hspace="5" src="ECG_Lab_14.png" alt=""> <h2 id="9">B Identify ECG Components</h2><pre class="codeinput"><span class="comment">% Q9</span>
+
+<span class="comment">% The number of segments the signal would be split into</span>
+seg= 10;
+segment = [];
+N = length(ECG1_Power_line_filtered);
+t = N/seg;
+x0=10;
+y0=10;
+width=10000;
+height=2000;
+figure()
+set(gcf,<span class="string">'position'</span>,[x0,y0,width,height])
+
+<span class="keyword">for</span> i = 1:seg
+    segment(i,:) = ECG1_Power_line_filtered((i-1)*t+1 : t*i );
+    subplot(10,1,i);
+    plot(segment(i,:));
+<span class="keyword">end</span>
+sgtitle(<span class="string">'Filtered ECG1 Segment'</span>);
+saveas(gcf,<span class="string">'Filtered_ECG1_10-equal_segments'</span>,<span class="string">'png'</span>);
+</pre><img vspace="5" hspace="5" src="ECG_Lab_15.png" alt=""> <h2 id="10">Threshold</h2><pre class="codeinput">T = [1000, 2000, 3000, 4000];
+[r,c]=size(segment);
+
+<span class="comment">% Loop to mark each threshold</span>
+<span class="keyword">for</span> i = 1:r
+    figure();
+    hold <span class="string">on</span>
+    plot(segment(i,:));
+    <span class="keyword">for</span> t = 1:length(T)
+        set(gcf,<span class="string">'position'</span>,[x0,y0,width,height]);
+        s(t,1:c) = thresh(segment(i,:),T(t))*T(t);
+        plot(s(t,1:c),<span class="string">'x'</span>);
+        plot(T(t)*ones(1,length(segment)));
+    <span class="keyword">end</span>
+    legend([<span class="string">'EGC1 Segment '</span>,num2str(i)],[<span class="string">'Threshold Marker at T= '</span>,num2str(T(1))],[<span class="string">'Threshold Line at T= '</span>,num2str(T(1))],[<span class="string">'Threshold Marker at T= '</span>,num2str(T(2))],[<span class="string">'Threshold Line at T= '</span>,num2str(T(2))],[<span class="string">'Threshold Marker at T= '</span>,num2str(T(3))],[<span class="string">'Threshold Line at T= '</span>,num2str(T(3))],[<span class="string">'Threshold Marker at T= '</span>,num2str(T(4))],[<span class="string">'Threshold Line at T= '</span>,num2str(T(4))]);
+    title([<span class="string">'ECG1 Segment '</span>,num2str(i)]);
+    set(legend(),<span class="string">'Location'</span>,<span class="string">'southeast'</span>);
+    saveas(gcf,sprintf(<span class="string">'ECG1_high_filtered_Segment%d_Threshold.png'</span>,i));
+<span class="keyword">end</span>
+
+<span class="comment">% Each Segments with different threshold level</span>
+<span class="keyword">for</span> i = 1:r
+    figure();
+    set(gcf,<span class="string">'position'</span>,[x0,y0,width,height])
+    subplot(5,1,1);
+    plot(segment(i,:));
+    title([<span class="string">'Filtered ECG1 Segment '</span>,num2str(i)]);
+    <span class="keyword">for</span> t = 1:length(T)
+        s = thresh(segment(i,:),T(t))*T(t);
+        subplot(5,1,t+1);
+        plot(s,<span class="string">'r'</span>);
+        title([<span class="string">'ECG1 Segment '</span>,num2str(i), <span class="string">' With Threshold of T= '</span>,num2str(T(t))]);
+    <span class="keyword">end</span>
+    sgtitle([<span class="string">'ECG1 Segment '</span>,num2str(i),<span class="string">' With Different Threshold'</span>]);
+    saveas(gcf,sprintf(<span class="string">'ECG1_high_filtered_Segment%d_T%d.png'</span>,i,T(t)));
+<span class="keyword">end</span>
+</pre><h2 id="11">BPM</h2><p>Calculate the BPM on Segment 2 using T = 3000</p><pre class="codeinput">T = 3000;
+bpm = rate(segment(2,:), Fs, T);
+disp(<span class="string">'Caculated BPM from given formula: '</span>);
+disp(bpm);
+
+<span class="comment">% Correction on BPM formula</span>
+x = segment(2,:);
+heart_beat = thresh(x,T);
+<span class="comment">% Find the heart beat when the consecutive point is 0</span>
+number = 0;
+<span class="keyword">for</span> i= 1: length(x)
+    <span class="keyword">if</span> (heart_beat(i) == 1) &amp;&amp; (heart_beat(i+1) == 0)
+        number = number + 1;
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="comment">% from the sampling frequency, compute the length of the</span>
+<span class="comment">% segment in minute</span>
+minute_length = length(x)/(Fs*60);
+<span class="comment">% compute the beats per minute</span>
+bpmCorrectm = number/minute_length;
+disp(<span class="string">'Caculated BPM from corrected formula: '</span>);
+disp(bpmCorrectm);
+</pre><h2 id="12">Each segment BPM</h2><pre class="codeinput">T = [1000, 2000, 3000, 4000];
+<span class="keyword">for</span> t = 1: length(T)
+    bpmSum = 0;
+    <span class="keyword">for</span> a = 1:r
+        x = segment(a,:);
+        heart_beat = thresh(x,T(t));
+        <span class="comment">% Find the heart beat when the consecutive point is 0</span>
+        number = 0;
+        <span class="keyword">for</span> i= 1: length(x)
+            <span class="keyword">if</span> (heart_beat(i) == 1) &amp;&amp; (heart_beat(i+1) == 0)
+                number = number + 1;
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+        <span class="comment">% from the sampling frequency, compute the length of the</span>
+        <span class="comment">% segment in minute</span>
+        minute_length = length(x)/(Fs*60);
+        <span class="comment">% compute the beats per minute</span>
+        bpmCorrectm = number/minute_length;
+        bpmSum = bpmCorrectm + bpmSum;
+    <span class="keyword">end</span>
+        bpmAvg = bpmSum/10;
+        disp([<span class="string">'Caculated Average BPM of ECG1'</span>, <span class="string">'using T= '</span>,num2str(T(t)),<span class="string">':'</span>]);
+        disp(bpmAvg);
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">Caculated Average BPM of ECG1using T= 1000:
+   131
+
+Caculated Average BPM of ECG1using T= 2000:
+   127
+
+Caculated Average BPM of ECG1using T= 3000:
+  126.2500
+
+Caculated Average BPM of ECG1using T= 4000:
+   122
+
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2019b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Lab 3: ECG
+% ELEC3802
+
+clc
+clear
+clf
+
+%% Load data
+
+load('ECG_noisy.mat');
+
+%% A. Examine the frequency spectrum and design filters for ECG
+%Examine the DC off-set
+figure(1)
+
+% Pick ECG1_noisy
+periodogram(ECG1_noisy);
+% Q3 There is DC offset as the value is not ZERO at frequency of 0Hz
+title('Noisy ECG1');
+saveas(gcf,'ECG1_noisy','png');
+
+% Raw signal
+N=length(ECG1_noisy);
+t=[0:N-1]/Fs;
+figure();
+plot(t(1:500),ECG1_noisy(1:500));   
+title('ECG1 Raw Signal');
+xlabel('Time (s)');
+ylabel('Intensity');
+saveas(gcf,'ECG1_noisy_Raw','png');
+
+
+NF=2^16;
+[Pxx,W]=periodogram(ECG1_noisy,[],NF);
+%converting to Hz
+fp=Fs*W/(2*pi);
+% CHECK FOR DC OFFSET AND POWER LINE PICK UP
+figure();
+plot(fp,Pxx,'-');
+title('Periodogram PSD of ECG1');
+xlabel('Frequency (Hz)');
+ylabel('Intensity');
+saveas(gcf,'ECG1_noisy_periodogram','png');
+
+% Q4. Yes, there are spikes in the signal at normalised freq = 0.4 (50Hz)
+
+%% Q5 Low order filter
+fc = 0.2;
+Wn = fc/(Fs/2);
+% 1st order 
+[b,a] = butter(1,Wn,'high');
+
+% Check the frequency response of the filter.
+figure();
+freqz(b,a);
+title('Frequency Response');
+saveas(gcf,'frequencyResponse_1','png');
+
+% Visualize filter
+ECG1_low_filtered = filter(b,a,ECG1_noisy);
+figure();
+% periodogram(ECG1_low_filtered);
+[Pxx,W]=periodogram(ECG1_low_filtered,[],NF);
+fp=Fs*W/(2*pi);
+figure();
+plot(fp,Pxx,'-');
+title('Periodogram PSD of ECG1 after High Pass Filter');
+xlabel('Frequency (Hz)');
+ylabel('Intensity');
+saveas(gcf,'Periodogram_PSD_ECG1_High_Pass_Filter','png');
+figure();
+freqz(ECG1_low_filtered);
+title('Frequency Response');
+saveas(gcf,'High_Pass_Filtered_frequencyResponse_1','png');
+
+
+%% Check the baseline drift
+figure();
+plot(t(1:4000),ECG1_noisy(1:4000)); 
+hold on
+plot(t(1:4000),ECG1_low_filtered(1:4000));
+title('ECG1 Raw Signal VS High-Pass Filtered Signal');
+xlabel('Time (s)');
+ylabel('Intensity');
+legend('ECG1 Raw Signal','ECG1 High-Pass Filtered');
+set(legend,'Location','best');
+saveas(gcf,'ECG1_baselineDrift','png');
+
+% The baseline drift and DC offset is partially removed.
+
+%% Q6 9th order filter
+
+fc_9 = 35;
+Wn_9 = fc_9/(Fs/2);
+[b_9,a_9] = butter(9,Wn_9,'low');
+ECG1_high_filtered = filter(b_9,a_9,ECG1_low_filtered);
+
+[Pxx,W]=periodogram(ECG1_high_filtered,[],NF);
+fp=Fs*W/(2*pi);
+figure();
+plot(fp,Pxx,'-');
+title('Periodogram PSD of ECG1 after Low Pass Filter');
+xlabel('Frequency (Hz)');
+ylabel('Intensity');
+saveas(gcf,'Periodogram_PSD_ECG1_Low_Pass_Filter','png');
+figure();
+freqz(ECG1_high_filtered);
+title('Frequency Response');
+saveas(gcf,'Low_Pass_Filtered_frequencyResponse_1','png');
+
+%% Q7 Notch filter
+
+noise_freq = 50;
+Wo = noise_freq/(Fs/2);  
+Bw = Wo/35;
+[b_n,a_n] = iirnotch(Wo,Bw);
+% fvtool(b,a);
+
+% Apply the filter to the signal
+ECG1_Power_line_filtered = filter(b_n,a_n,ECG1_high_filtered);
+[Pxx,W]=periodogram(ECG1_Power_line_filtered,[],NF);
+fp=W*(Fs/2)/(pi);
+figure();
+plot(fp,Pxx,'-');
+title('Periodogram PSD of ECG1 after Notch Filter');
+xlabel('Frequency (Hz)');
+ylabel('Intensity');
+saveas(gcf,'ECG1_Power_line_filtered_PSD','png');
+
+figure();
+freqz(ECG1_Power_line_filtered);
+title('Frequency Response');
+saveas(gcf,'Nortch_Filtered_frequencyResponse_1','png');
+
+%% Examine filtered signal
+figure();
+plot(t(1:500),ECG1_Power_line_filtered(1:500));   
+title('ECG1 Filtered Signal');
+xlabel('Time (s)');
+ylabel('Intensity');
+saveas(gcf,'ECG1_Filtered_Exmained','png');
+
+%% B Identify ECG Components
+
+% Q9
+
+% The number of segments the signal would be split into
+seg= 10;
+segment = [];
+N = length(ECG1_Power_line_filtered);
+t = N/seg;
+x0=10;
+y0=10;
+width=10000;
+height=2000;
+figure()
+set(gcf,'position',[x0,y0,width,height])
+
+for i = 1:seg
+    segment(i,:) = ECG1_Power_line_filtered((i-1)*t+1 : t*i );
+    subplot(10,1,i);
+    plot(segment(i,:));
+end 
+sgtitle('Filtered ECG1 Segment');
+saveas(gcf,'Filtered_ECG1_10-equal_segments','png');
+
+%% Threshold
+T = [1000, 2000, 3000, 4000];
+[r,c]=size(segment);
+
+% Loop to mark each threshold
+for i = 1:r
+    figure();
+    hold on
+    plot(segment(i,:));
+    for t = 1:length(T)
+        set(gcf,'position',[x0,y0,width,height]);
+        s(t,1:c) = thresh(segment(i,:),T(t))*T(t);
+        plot(s(t,1:c),'x');
+        plot(T(t)*ones(1,length(segment)));
+    end
+    legend(['EGC1 Segment ',num2str(i)],['Threshold Marker at T= ',num2str(T(1))],['Threshold Line at T= ',num2str(T(1))],['Threshold Marker at T= ',num2str(T(2))],['Threshold Line at T= ',num2str(T(2))],['Threshold Marker at T= ',num2str(T(3))],['Threshold Line at T= ',num2str(T(3))],['Threshold Marker at T= ',num2str(T(4))],['Threshold Line at T= ',num2str(T(4))]);
+    title(['ECG1 Segment ',num2str(i)]);
+    set(legend(),'Location','southeast');
+    saveas(gcf,sprintf('ECG1_high_filtered_Segment%d_Threshold.png',i));
+end
+
+% Each Segments with different threshold level
+for i = 1:r
+    figure();
+    set(gcf,'position',[x0,y0,width,height])
+    subplot(5,1,1);
+    plot(segment(i,:));
+    title(['Filtered ECG1 Segment ',num2str(i)]);
+    for t = 1:length(T)
+        s = thresh(segment(i,:),T(t))*T(t);
+        subplot(5,1,t+1);
+        plot(s,'r');
+        title(['ECG1 Segment ',num2str(i), ' With Threshold of T= ',num2str(T(t))]);
+    end
+    sgtitle(['ECG1 Segment ',num2str(i),' With Different Threshold']);
+    saveas(gcf,sprintf('ECG1_high_filtered_Segment%d_T%d.png',i,T(t)));
+end
+%% BPM
+% Calculate the BPM on Segment 2 using T = 3000
+T = 3000;
+bpm = rate(segment(2,:), Fs, T);
+disp('Caculated BPM from given formula: ');
+disp(bpm);
+
+% Correction on BPM formula
+x = segment(2,:);
+heart_beat = thresh(x,T);
+% Find the heart beat when the consecutive point is 0
+number = 0;
+for i= 1: length(x)
+    if (heart_beat(i) == 1) && (heart_beat(i+1) == 0)
+        number = number + 1;
+    end
+end
+% from the sampling frequency, compute the length of the
+% segment in minute
+minute_length = length(x)/(Fs*60);
+% compute the beats per minute
+bpmCorrectm = number/minute_length;
+disp('Caculated BPM from corrected formula: ');
+disp(bpmCorrectm);
+
+%% Each segment BPM
+T = [1000, 2000, 3000, 4000];
+for t = 1: length(T)
+    bpmSum = 0;
+    for a = 1:r
+        x = segment(a,:);
+        heart_beat = thresh(x,T(t));
+        % Find the heart beat when the consecutive point is 0
+        number = 0;
+        for i= 1: length(x)
+            if (heart_beat(i) == 1) && (heart_beat(i+1) == 0)
+                number = number + 1;
+            end
+        end
+        % from the sampling frequency, compute the length of the
+        % segment in minute
+        minute_length = length(x)/(Fs*60);
+        % compute the beats per minute
+        bpmCorrectm = number/minute_length;
+        bpmSum = bpmCorrectm + bpmSum;
+    end
+        bpmAvg = bpmSum/10;
+        disp(['Caculated Average BPM of ECG1', 'using T= ',num2str(T(t)),':']);
+        disp(bpmAvg);
+end
+##### SOURCE END #####
+--></body></html>
