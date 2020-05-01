@@ -103,3 +103,5 @@ for i = 1:r
     sgtitle(['Filtered ECG',num2str(i),' Noisy in 10 Equal Segments']);
     saveas(gcf,sprintf('Filtered_ECG%d_noisy_10-equal_segments.png',i));
 end
+
+% END of Lab 3: ECG - Looping all ECG signals %

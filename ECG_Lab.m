@@ -4,22 +4,21 @@
 clc
 clear
 clf
-
 %% Load data
 
 load('ECG_noisy.mat');
 
 %% A. Examine the frequency spectrum and design filters for ECG
-%Examine the DC off-set
-figure(1)
 
 % Pick ECG1_noisy
+figure(1)
 periodogram(ECG1_noisy);
-% Q3 There is DC offset as the value is not ZERO at frequency of 0Hz
 title('Noisy ECG1');
 saveas(gcf,'ECG1_noisy','png');
 
-% Raw signal
+% Q3 There is DC offset as the value is not ZERO at frequency of 0Hz
+
+% Inspect the raw signal
 N=length(ECG1_noisy);
 t=[0:N-1]/Fs;
 figure();
@@ -29,7 +28,7 @@ xlabel('Time (s)');
 ylabel('Intensity');
 saveas(gcf,'ECG1_noisy_Raw','png');
 
-
+% Plot ECG1_noisy periodogram and PSD
 NF=2^16;
 [Pxx,W]=periodogram(ECG1_noisy,[],NF);
 %converting to Hz
@@ -44,10 +43,10 @@ saveas(gcf,'ECG1_noisy_periodogram','png');
 
 % Q4. Yes, there are spikes in the signal at normalised freq = 0.4 (50Hz)
 
-%% Q5 Low order filter
+%% Q5 Low order filter - This is high-pass filter with 1st order
 fc = 0.2;
 Wn = fc/(Fs/2);
-% 1st order 
+% Make up the high-pass filter
 [b,a] = butter(1,Wn,'high');
 
 % Check the frequency response of the filter.
@@ -56,18 +55,19 @@ freqz(b,a);
 title('Frequency Response');
 saveas(gcf,'frequencyResponse_1','png');
 
-% Visualize filter
+% Apply the high-pass filter to ECG1
 ECG1_low_filtered = filter(b,a,ECG1_noisy);
 figure();
-% periodogram(ECG1_low_filtered);
 [Pxx,W]=periodogram(ECG1_low_filtered,[],NF);
 fp=Fs*W/(2*pi);
+% Plot PSD
 figure();
 plot(fp,Pxx,'-');
 title('Periodogram PSD of ECG1 after High Pass Filter');
 xlabel('Frequency (Hz)');
 ylabel('Intensity');
 saveas(gcf,'Periodogram_PSD_ECG1_High_Pass_Filter','png');
+% Plot the frequency response
 figure();
 freqz(ECG1_low_filtered);
 title('Frequency Response');
@@ -75,6 +75,8 @@ saveas(gcf,'High_Pass_Filtered_frequencyResponse_1','png');
 
 
 %% Check the baseline drift
+% Plot the original signal and the filtered signal
+% To observe if there's changes
 figure();
 plot(t(1:4000),ECG1_noisy(1:4000)); 
 hold on
@@ -88,13 +90,14 @@ saveas(gcf,'ECG1_baselineDrift','png');
 
 % The baseline drift and DC offset is partially removed.
 
-%% Q6 9th order filter
-
+%% Q6 9th order filter - Low pass filter with 9th order
+% Cut-off frequency is set to be 35 Hz
 fc_9 = 35;
 Wn_9 = fc_9/(Fs/2);
 [b_9,a_9] = butter(9,Wn_9,'low');
+% Apply the filter to ECG1_low_filtered
 ECG1_high_filtered = filter(b_9,a_9,ECG1_low_filtered);
-
+% Get PSD and frequency repsonse 
 [Pxx,W]=periodogram(ECG1_high_filtered,[],NF);
 fp=Fs*W/(2*pi);
 figure();
@@ -109,17 +112,17 @@ title('Frequency Response');
 saveas(gcf,'Low_Pass_Filtered_frequencyResponse_1','png');
 
 %% Q7 Notch filter
-
+% Set up the cut-off frequency at 50 Hz
 noise_freq = 50;
 Wo = noise_freq/(Fs/2);  
 Bw = Wo/35;
 [b_n,a_n] = iirnotch(Wo,Bw);
-% fvtool(b,a);
 
 % Apply the filter to the signal
 ECG1_Power_line_filtered = filter(b_n,a_n,ECG1_high_filtered);
 [Pxx,W]=periodogram(ECG1_Power_line_filtered,[],NF);
 fp=W*(Fs/2)/(pi);
+% Generate PSD and frequency response
 figure();
 plot(fp,Pxx,'-');
 title('Periodogram PSD of ECG1 after Notch Filter');
@@ -133,6 +136,7 @@ title('Frequency Response');
 saveas(gcf,'Nortch_Filtered_frequencyResponse_1','png');
 
 %% Examine filtered signal
+% Have a quick look at the filtered signal 
 figure();
 plot(t(1:500),ECG1_Power_line_filtered(1:500));   
 title('ECG1 Filtered Signal');
@@ -140,22 +144,22 @@ xlabel('Time (s)');
 ylabel('Intensity');
 saveas(gcf,'ECG1_Filtered_Exmained','png');
 
-%% B Identify ECG Components
+%% Part-B Identify ECG Components
 
-% Q9
-
-% The number of segments the signal would be split into
+% Q9 Split the ECG signal into 10 equal segments
 seg= 10;
 segment = [];
 N = length(ECG1_Power_line_filtered);
 t = N/seg;
+% Set up the dimensions for the plot
 x0=10;
 y0=10;
 width=10000;
 height=2000;
-figure()
+figure();
 set(gcf,'position',[x0,y0,width,height])
 
+% This loop will ensure the ECG signal be divided into 10 equal parts
 for i = 1:seg
     segment(i,:) = ECG1_Power_line_filtered((i-1)*t+1 : t*i );
     subplot(10,1,i);
@@ -165,7 +169,9 @@ sgtitle('Filtered ECG1 Segment');
 saveas(gcf,'Filtered_ECG1_10-equal_segments','png');
 
 %% Threshold
+% A matrix contain the chosen threshold levels
 T = [1000, 2000, 3000, 4000];
+% Get the size of the 10 euqual segments matrix from previous section
 [r,c]=size(segment);
 
 % Loop to mark each threshold
@@ -251,3 +257,5 @@ for t = 1: length(T)
         disp(['Caculated Average BPM of ECG1', 'using T= ',num2str(T(t)),':']);
         disp(round(bpmAvg));
 end
+
+% END of Lab 3: ECG - Main %
