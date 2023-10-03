@@ -17,10 +17,10 @@ ECG=[ECG1_noisy;ECG2_noisy;ECG3_noisy;ECG4_noisy;ECG5_noisy];
 for i = 1:r
     figure()
     % Inpect the noisy ECG signal
-    periodogram(ECG(i,1:c))
+%     periodogram(ECG(i,1:c))
     % Save the file
-    title(['ECG',num2str(i),'_',' noisy']);
-    saveas(gcf,sprintf('ECG%d_noisy.png',i));
+%     title(['ECG',num2str(i),'_',' noisy']);
+%     saveas(gcf,sprintf('ECG%d_noisy.png',i));
     
     % Q5 
     % Low order filter - High Pass Filter
@@ -30,31 +30,31 @@ for i = 1:r
     [b,a] = butter(1,Wn,'high');
 
     % Check the frequency response of the filter.
-    figure();
-    freqz(b,a);
-    title(['Frequency Response ',num2str(i)]);
-    saveas(gcf,sprintf('frequencyResponse_%d.png',i));
+%     figure();
+%     freqz(b,a);
+%     title(['Frequency Response ',num2str(i)]);
+%     saveas(gcf,sprintf('frequencyResponse_%d.png',i));
 
     % Visualize filter
     ECG_low_filtered = filter(b,a,ECG(i,1:c));
-    figure();
-    periodogram(ECG_low_filtered);
-    title(['ECG High Pass Filter ',num2str(i)]);
-    saveas(gcf,sprintf('ECG_High_Pass_Filter_%d.png',i));
-    freqz(ECG_low_filtered);
-    title(['High-Pass Filter Frequency Response of ECG',num2str(i)]);
-    saveas(gcf,sprintf('High_Pass_Filtered_Frequency_Response_ECG%d.png',i));
+%     figure();
+%     periodogram(ECG_low_filtered);
+%     title(['ECG High Pass Filter ',num2str(i)]);
+%     saveas(gcf,sprintf('ECG_High_Pass_Filter_%d.png',i));
+%     freqz(ECG_low_filtered);
+%     title(['High-Pass Filter Frequency Response of ECG',num2str(i)]);
+%     saveas(gcf,sprintf('High_Pass_Filtered_Frequency_Response_ECG%d.png',i));
     
     % Q6 Low-pass Filter
     fc_9 = 35;
     Wn_9 = fc_9/(Fs/2);
     [b_9,a_9] = butter(9,Wn_9,'low');
     ECG_high_filtered = filter(b_9,a_9,ECG_low_filtered);
-    figure();
-    periodogram(ECG_high_filtered);
-    title(['ECG Low Pass Filter ',num2str(i)]);
-    saveas(gcf,sprintf('ECG_Low_Pass_Filter%d.png',i));
-    
+%     figure();
+%     periodogram(ECG_high_filtered);
+%     title(['ECG Low Pass Filter ',num2str(i)]);
+%     saveas(gcf,sprintf('ECG_Low_Pass_Filter%d.png',i));
+%     
     % Q7 Power Spectrum Density
     % Design a filter with a Q-factor of Q=35 to remove a 50 Hz tone from 
     % system running at 250 Hz.
@@ -62,22 +62,22 @@ for i = 1:r
     Wo = noise_freq/(Fs/2);  
     Bw = Wo/35;
     [b_n,a_n] = iirnotch(Wo,Bw);
-    fvtool(b_n,a_n); % Visualize the filter
+%     fvtool(b_n,a_n); % Visualize the filter
     
     % Apply the filter to the signal
     ECG_Power_Spectrum_Density = filter(b_n,a_n,ECG_high_filtered);
-    figure();
-    periodogram(ECG_Power_Spectrum_Density);
-    title(['ECG Notch Filter Filter ',num2str(i)]);
-    saveas(gcf,sprintf('ECG_Power_Spectrum_Density_%d.png',i));
+%     figure();
+%     periodogram(ECG_Power_Spectrum_Density);
+%     title(['ECG Notch Filter Filter ',num2str(i)]);
+%     saveas(gcf,sprintf('ECG_Power_Spectrum_Density_%d.png',i));
     
     % Examine filtered signal
-    figure();
-    plot(t(1:500),ECG1_Power_line_filtered(1:500));   
-    title('ECG Filtered Signal');
-    xlabel('Time (s)');
-    ylabel('Intensity');
-    saveas(gcf,sprintf('ECG_Filtered_Exmained_%d.png',i));
+%     figure();
+%     plot(t(1:500),ECG1_Power_line_filtered(1:500));   
+%     title('ECG Filtered Signal');
+%     xlabel('Time (s)');
+%     ylabel('Intensity');
+%     saveas(gcf,sprintf('ECG_Filtered_Exmained_%d.png',i));
     
     % Q9 Examine the signal in 10 segments
 
@@ -91,27 +91,27 @@ for i = 1:r
     y0=10;
     width=10000;
     height=2000;
-    figure()
-    set(gcf,'position',[x0,y0,width,height])
+%     figure()
+%     set(gcf,'position',[x0,y0,width,height])
     
     % Inner loop to obatin the segments
     for a = 1:seg
         segmentMatix(a,:) = ECG_Power_Spectrum_Density((a-1)*t+1 : t*a );
-        subplot(10,1,a);
-        plot(segmentMatix(a,:));
+%         subplot(10,1,a);
+%         plot(segmentMatix(a,:));
     end 
-    sgtitle(['Filtered ECG',num2str(i),' Noisy in 10 Equal Segments']);
-    saveas(gcf,sprintf('Filtered_ECG%d_noisy_10-equal_segments.png',i));
+%     sgtitle(['Filtered ECG',num2str(i),' Noisy in 10 Equal Segments']);
+%     saveas(gcf,sprintf('Filtered_ECG%d_noisy_10-equal_segments.png',i));
     
     %% BPM
     % Calculate the BPM on Segment 2 using T = 3000
-    T = 3000;
-    bpm = rate(segment(2,:), Fs, T);
+    T = 1000;
+    bpm = rate(segmentMatix(2,:), Fs, T);
     disp('Caculated BPM from given formula: ');
     disp(round(bpm));
 
     % Correction on BPM formula
-    x = segment(2,:);
+    x = segmentMatix(2,:);
     heart_beat = thresh(x,T);
     % Find the heart beat when the consecutive point is 0
     number = 0;
